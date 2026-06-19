@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Buchhaltungsplattform</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Hauptnavigation">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">B</div>
+          <div>
+            <strong>Buchhaltung</strong>
+            <span>Eitner Security GmbH</span>
+          </div>
+        </div>
+        <nav class="nav-list" id="navList"></nav>
+        <div class="sidebar-footer">
+          <span>Mandant</span>
+          <strong>Eitner Security GmbH</strong>
+          <small>SKR03 · Juni 2026</small>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow" id="viewEyebrow">Dashboard</p>
+            <h1 id="viewTitle">Belege, Banken und Buchungen</h1>
+            <div class="context-bar" aria-label="Mandantenkontext">
+              <span>Mandant: Eitner Security GmbH</span>
+              <span>Wirtschaftsjahr: 2026</span>
+              <span>Periode: Juni 2026</span>
+              <strong>Offen</strong>
+            </div>
+          </div>
+          <div class="topbar-actions">
+            <input class="global-search" type="search" placeholder="Beleg, Konto, Betrag suchen" aria-label="Suche">
+            <button class="icon-button" id="exportButton" title="DATEV-Export vorbereiten" aria-label="DATEV-Export vorbereiten">
+              <span aria-hidden="true">⇩</span>
+            </button>
+            <button class="primary-button" id="newReceiptButton">Beleg erfassen</button>
+          </div>
+        </header>
+
+        <section class="status-strip" aria-label="Kennzahlen" id="metricStrip"></section>
+
+        <section class="view-panel" id="viewPanel"></section>
+      </main>
+    </div>
+
+    <dialog id="receiptDialog">
+      <form method="dialog" class="dialog-card" id="receiptForm">
+        <header>
+          <div>
+            <p class="eyebrow">Upload-Simulation</p>
+            <h2>Neuen Beleg erfassen</h2>
+          </div>
+          <button class="icon-button" value="cancel" title="Schließen" aria-label="Schließen">×</button>
+        </header>
+        <label>
+          Lieferant oder Kunde
+          <input name="party" required value="Hetzner Online GmbH">
+        </label>
+        <label>
+          Betrag brutto
+          <input name="amount" type="number" step="0.01" required value="84.49">
+        </label>
+        <label>
+          Belegart
+          <select name="type">
+            <option>Eingangsrechnung</option>
+            <option>Ausgangsrechnung</option>
+            <option>Kassenbeleg</option>
+          </select>
+        </label>
+        <label>
+          Verarbeitungskanal
+          <select name="channel">
+            <option>E-Mail-Postfach</option>
+            <option>Upload</option>
+            <option>API</option>
+            <option>Mobile Fotoerfassung</option>
+          </select>
+        </label>
+        <footer>
+          <button value="cancel">Abbrechen</button>
+          <button class="primary-button" value="default">Beleg speichern</button>
+        </footer>
+      </form>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
