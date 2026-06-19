@@ -1,8 +1,9 @@
-const today = "19.06.2026";
+﻿const today = "19.06.2026";
 
 const state = {
   activeView: "dashboard",
   receiptFilter: "Alle",
+  selectedReceiptId: "B-1046",
   rules: [
     { partner: "Hetzner Online GmbH", account: "4925 Internetkosten", tax: "VSt 19%", confidence: 94 },
     { partner: "DATEV eG", account: "4950 Beratungskosten", tax: "VSt 19%", confidence: 96 }
@@ -252,7 +253,7 @@ function table(headers, rows) {
 
 function receiptRows(items) {
   return items.map(item => `
-    <tr>
+    <tr class="${state.selectedReceiptId === item.id ? "selected-row" : ""}">
       <td class="truncate">${item.id}</td>
       <td class="truncate">${item.party}</td>
       <td>${item.type}</td>
@@ -260,50 +261,84 @@ function receiptRows(items) {
       <td class="truncate">${item.account}</td>
       <td><span class="badge ${badgeClass(item.status)}">${item.status}</span></td>
       <td>
-        <button data-action="book" data-id="${item.id}">${item.status === "Gebucht" ? "Journal" : "Pruefen"}</button>
+        <button data-action="select-receipt" data-id="${item.id}">${state.selectedReceiptId === item.id ? "Offen" : "Auswaehlen"}</button>
       </td>
     </tr>
   `).join("");
 }
 
 function renderDashboard() {
-  const latest = state.receipts.slice(0, 4);
+  const openReceipts = state.receipts.filter(item => item.status !== "Gebucht").length;
+  const openBank = state.bank.filter(item => item.status !== "Zugeordnet").length;
+  const openOpos = state.opos.filter(item => item.open > 0).length;
+  const exportReady = state.journal.filter(item => item.export === "bereit").length;
+  const cards = [
+    { title: "Belege pruefen", value: openReceipts, note: "Inbox und Kontierung", view: "receipts", action: "Belegarbeitsplatz" },
+    { title: "Bank abgleichen", value: openBank, note: "Umsaetze ohne finale Zuordnung", view: "bank", action: "Bankmodul" },
+    { title: "OPOS klaeren", value: openOpos, note: "Offene Posten", view: "opos", action: "OPOS" },
+    { title: "DATEV exportieren", value: exportReady, note: "Buchungssaetze bereit", view: "export", action: "Export" }
+  ];
+
   return `
-    <div class="view-grid">
-      <div class="stack">
-        <section class="table-panel">
-          <div class="section-header">
-            <div>
-              <h2>Belegqueue</h2>
-              <p>Erkannte Belege mit Kontierungsvorschlag und Status</p>
-            </div>
-            <button data-view-jump="receipts">Oeffnen</button>
+    <div class="stack">
+      <section class="workflow-panel">
+        <div class="section-header">
+          <div>
+            <h2>Arbeitsvorrat heute</h2>
+            <p>Prioritaeten, Sperren und Monatsabschluss statt Belegliste</p>
           </div>
-          ${table(["Beleg", "Partner", "Typ", "Betrag", "Konto", "Status", ""], receiptRows(latest))}
-        </section>
-        <section class="workflow-panel">
-          <div class="section-header">
-            <div>
-              <h2>Monatlicher Ablauf</h2>
-              <p>Vom Eingang bis zum Steuerberaterexport</p>
-            </div>
-          </div>
-          <div class="workflow-steps">
-            ${["Belege erfassen", "Kontierung pruefen", "Journal buchen", "DATEV exportieren"].map((step, index) => `
-              <div class="step">
-                <span class="badge blue">0${index + 1}</span>
-                <strong>${step}</strong>
-                <span>${["API, E-Mail, Upload und Kassenbuch", "SKR03/SKR04 mit Konfidenz", "Soll/Haben und Auditlog", "CSV/EXTF-naher Stapel"][index]}</span>
+          <button data-action="vat-check">Monat pruefen</button>
+        </div>
+        <div class="task-grid">
+          ${cards.map(card => `
+            <article class="task-card">
+              <span>${card.title}</span>
+              <strong>${card.value}</strong>
+              <small>${card.note}</small>
+              <button data-view-jump="${card.view}">${card.action}</button>
+            </article>
+          `).join("")}
+        </div>
+      </section>
+      <div class="view-grid">
+        <div class="stack">
+          <section class="card">
+            <div class="section-header">
+              <div>
+                <h2>Qualitaetsampel Juni</h2>
+                <p>Was vor UStVA und Export noch blockiert</p>
               </div>
-            `).join("")}
-          </div>
-        </section>
+            </div>
+            <div class="suggestion-list">
+              <div class="suggestion"><div><strong>Bankabstimmung</strong><small>${openBank === 0 ? "vollstaendig" : `${openBank} Klaerfaelle offen`}</small></div><span class="badge ${openBank === 0 ? "green" : "amber"}">${openBank === 0 ? "OK" : "Pruefen"}</span></div>
+              <div class="suggestion"><div><strong>Belegpflicht</strong><small>${openReceipts} Belege noch nicht gebucht</small></div><span class="badge ${openReceipts === 0 ? "green" : "red"}">${openReceipts === 0 ? "OK" : "Offen"}</span></div>
+              <div class="suggestion"><div><strong>Exportfaehigkeit</strong><small>${exportReady} Buchungen im DATEV-Stapel</small></div><span class="badge green">bereit</span></div>
+            </div>
+          </section>
+          <section class="workflow-panel">
+            <div class="section-header">
+              <div>
+                <h2>Monatlicher Ablauf</h2>
+                <p>Vom Eingang bis zum Steuerberaterexport</p>
+              </div>
+            </div>
+            <div class="workflow-steps">
+              ${["Belege erfassen", "Kontierung pruefen", "Journal buchen", "DATEV exportieren"].map((step, index) => `
+                <div class="step">
+                  <span class="badge blue">0${index + 1}</span>
+                  <strong>${step}</strong>
+                  <span>${["API, E-Mail, Upload und Kassenbuch", "SKR03/SKR04 mit Konfidenz", "Soll/Haben und Auditlog", "CSV/EXTF-naher Stapel"][index]}</span>
+                </div>
+              `).join("")}
+            </div>
+          </section>
+        </div>
+        <aside class="stack">
+          ${renderSuggestions()}
+          ${renderBankCard()}
+          ${renderPeriodCard()}
+        </aside>
       </div>
-      <aside class="stack">
-        ${renderSuggestions()}
-        ${renderBankCard()}
-        ${renderPeriodCard()}
-      </aside>
     </div>
   `;
 }
@@ -385,22 +420,63 @@ function renderPeriodCard() {
 function renderReceipts() {
   const filters = ["Alle", "Bereit", "Pruefen", "Klaerung", "Gebucht"];
   const items = state.receiptFilter === "Alle" ? state.receipts : state.receipts.filter(item => item.status === state.receiptFilter);
+  const selected = state.receipts.find(item => item.id === state.selectedReceiptId) || items[0] || state.receipts[0];
+  if (selected) state.selectedReceiptId = selected.id;
   return `
-    <section class="table-panel">
-      <div class="section-header">
-        <div>
-          <h2>Belege</h2>
-          <p>Pruefen, korrigieren, Regel anlernen und in das Journal buchen</p>
+    <div class="view-grid receipt-workbench">
+      <section class="table-panel">
+        <div class="section-header">
+          <div>
+            <h2>Inbox</h2>
+            <p>Beleg auswaehlen, rechts Felder bearbeiten und buchen</p>
+          </div>
+          <div class="segmented">
+            ${filters.map(filter => `<button class="${state.receiptFilter === filter ? "active" : ""}" data-filter="${filter}">${filter}</button>`).join("")}
+          </div>
         </div>
-        <div class="segmented">
-          ${filters.map(filter => `<button class="${state.receiptFilter === filter ? "active" : ""}" data-filter="${filter}">${filter}</button>`).join("")}
-        </div>
-      </div>
-      ${table(["Beleg", "Partner", "Typ", "Betrag", "Konto", "Status", ""], receiptRows(items))}
-    </section>
+        ${table(["Beleg", "Partner", "Typ", "Betrag", "Konto", "Status", ""], receiptRows(items))}
+      </section>
+      ${renderReceiptDetail(selected)}
+    </div>
   `;
 }
 
+function renderReceiptDetail(receipt) {
+  if (!receipt) return `<section class="card"><div class="empty">Kein Beleg in diesem Filter.</div></section>`;
+  return `
+    <section class="card receipt-detail">
+      <div class="section-header">
+        <div>
+          <h2>${receipt.id} pruefen</h2>
+          <p>${receipt.channel} · ${receipt.type} · Konfidenz ${receipt.confidence}%</p>
+        </div>
+        <span class="badge ${badgeClass(receipt.status)}">${receipt.status}</span>
+      </div>
+      <div class="preview-box">
+        <strong>Belegvorschau</strong>
+        <span>${receipt.party}</span>
+        <span>${formatMoney(receipt.amount)}</span>
+        <small>Simulierte PDF/XML-Vorschau mit Hash- und OCR-Ergebnis</small>
+      </div>
+      <div class="field-grid">
+        <label>Partner<input id="receiptParty" value="${receipt.party}"></label>
+        <label>Betrag<input id="receiptAmount" type="number" step="0.01" value="${receipt.amount}"></label>
+        <label>Konto<input id="receiptAccount" value="${receipt.account}"></label>
+        <label>Steuer %<input id="receiptTax" type="number" step="1" value="${receipt.tax}"></label>
+      </div>
+      <div class="action-row">
+        <button data-action="save-receipt" data-id="${receipt.id}">Aenderungen speichern</button>
+        <button data-action="validate-receipt" data-id="${receipt.id}">Validieren</button>
+        <button class="primary-button" data-action="post-receipt" data-id="${receipt.id}">Ins Journal buchen</button>
+      </div>
+      <div class="action-row">
+        <button data-action="learn-rule" data-id="${receipt.id}">Regel speichern</button>
+        <button data-action="mark-duplicate" data-id="${receipt.id}">Dublette markieren</button>
+        <button data-action="request-approval" data-id="${receipt.id}">Freigabe anfordern</button>
+      </div>
+    </section>
+  `;
+}
 function renderBank() {
   return `
     <section class="table-panel">
@@ -696,7 +772,7 @@ function renderExport() {
             <div class="suggestion">
               <div>
                 <strong>${item.event}</strong>
-                <small>${item.time} · ${item.user}</small>
+                <small>${item.time} - ${item.user}</small>
               </div>
               <span class="badge blue">Log</span>
             </div>
@@ -739,6 +815,90 @@ function createJournal(source, entry, amount, status = "Gebucht", exportStatus =
   state.journal.unshift(item);
   state.periods.at(-1).bookings += 1;
   return item;
+}
+
+function selectedReceiptFormData() {
+  return {
+    party: qs("#receiptParty")?.value?.trim() || "",
+    amount: Number(qs("#receiptAmount")?.value || 0),
+    account: qs("#receiptAccount")?.value?.trim() || "Noch offen",
+    tax: Number(qs("#receiptTax")?.value || 0)
+  };
+}
+
+function applyReceiptDetail(id) {
+  const receipt = state.receipts.find(item => item.id === id);
+  if (!receipt) return null;
+  const data = selectedReceiptFormData();
+  receipt.party = data.party;
+  receipt.amount = data.amount;
+  receipt.account = data.account;
+  receipt.tax = data.tax;
+  return receipt;
+}
+
+function saveReceiptDetail(id) {
+  const receipt = applyReceiptDetail(id);
+  if (!receipt) return;
+  receipt.status = receipt.status === "Klaerung" ? "Pruefen" : receipt.status;
+  addAudit(`${receipt.id} Felder aktualisiert`);
+  showToast(`${receipt.id} wurde gespeichert.`);
+  render();
+}
+
+function validateReceipt(id) {
+  const receipt = applyReceiptDetail(id);
+  if (!receipt) return;
+  receipt.status = "Bereit";
+  receipt.confidence = Math.max(receipt.confidence, 88);
+  addAudit(`${receipt.id} validiert`);
+  showToast(`${receipt.id} ist bereit zum Buchen.`);
+  render();
+}
+
+function postReceiptFromDetail(id) {
+  const receipt = applyReceiptDetail(id);
+  if (!receipt) return;
+  if (receipt.status === "Gebucht") {
+    setView("journal");
+    return;
+  }
+  receipt.status = "Gebucht";
+  receipt.confidence = Math.max(receipt.confidence, 92);
+  const debit = receipt.account.split(" ")[0] || "4930";
+  const credit = receipt.type === "Ausgangsrechnung" ? "8400" : "1600";
+  createJournal(`Beleg ${receipt.id}`, `${debit} an ${credit}`, receipt.amount);
+  addAudit(`${receipt.id} direkt aus Belegdetail gebucht`);
+  showToast(`${receipt.id} wurde ins Journal gebucht.`);
+  render();
+}
+
+function learnRuleFromReceipt(id) {
+  const receipt = applyReceiptDetail(id);
+  if (!receipt) return;
+  state.rules.unshift({ partner: receipt.party, account: receipt.account, tax: `VSt ${receipt.tax}%`, confidence: Math.max(receipt.confidence, 85) });
+  receipt.confidence = Math.max(receipt.confidence, 90);
+  addAudit(`Regel aus ${receipt.id} gespeichert`);
+  showToast(`Regel fuer ${receipt.party} gespeichert.`);
+  render();
+}
+
+function markDuplicate(id) {
+  const receipt = state.receipts.find(item => item.id === id);
+  if (!receipt) return;
+  receipt.status = "Klaerung";
+  addAudit(`${receipt.id} als Dublette markiert`);
+  showToast(`${receipt.id} ist als Dublette/Klaerfall markiert.`);
+  render();
+}
+
+function requestApproval(id) {
+  const receipt = applyReceiptDetail(id);
+  if (!receipt) return;
+  receipt.status = "Klaerung";
+  addAudit(`Freigabe fuer ${receipt.id} angefordert`);
+  showToast(`Freigabe fuer ${receipt.id} wurde angefordert.`);
+  render();
 }
 
 function bookReceipt(id) {
@@ -947,6 +1107,16 @@ function bindViewEvents() {
       const action = button.dataset.action;
       const id = button.dataset.id;
       const actions = {
+        "select-receipt": () => {
+          state.selectedReceiptId = id;
+          render();
+        },
+        "save-receipt": () => saveReceiptDetail(id),
+        "validate-receipt": () => validateReceipt(id),
+        "post-receipt": () => postReceiptFromDetail(id),
+        "learn-rule": () => learnRuleFromReceipt(id),
+        "mark-duplicate": () => markDuplicate(id),
+        "request-approval": () => requestApproval(id),
         book: () => bookReceipt(id),
         "sync-bank": syncBank,
         "match-bank": () => matchBank(id),

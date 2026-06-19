@@ -461,6 +461,36 @@ button:hover {
   gap: 10px;
 }
 
+.task-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.task-card {
+  min-height: 150px;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid #e4eaf2;
+  border-radius: 8px;
+  background: #fbfcff;
+}
+
+.task-card span,
+.task-card small {
+  color: var(--muted);
+}
+
+.task-card strong {
+  font-size: 34px;
+}
+
+.task-card button {
+  margin-top: auto;
+}
+
 .step {
   min-height: 112px;
   padding: 12px;
@@ -487,6 +517,76 @@ button:hover {
   color: var(--muted);
   border: 1px dashed var(--line);
   border-radius: 8px;
+}
+
+.selected-row td {
+  background: #eef6ff;
+}
+
+.receipt-workbench {
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.72fr);
+}
+
+.receipt-detail {
+  position: sticky;
+  top: 18px;
+}
+
+.preview-box {
+  min-height: 150px;
+  display: grid;
+  gap: 8px;
+  align-content: center;
+  padding: 18px;
+  border: 1px dashed #9fb3cc;
+  border-radius: 8px;
+  background: #f8fbff;
+}
+
+.preview-box strong,
+.preview-box span,
+.preview-box small {
+  display: block;
+}
+
+.preview-box span {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.preview-box small {
+  color: var(--muted);
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.field-grid label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.field-grid input {
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: var(--ink);
+  background: #fff;
+}
+
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
 }
 
 dialog {
@@ -599,8 +699,14 @@ dialog::backdrop {
 
   .status-strip,
   .nav-list,
-  .workflow-steps {
+  .workflow-steps,
+  .task-grid,
+  .field-grid {
     grid-template-columns: 1fr;
+  }
+
+  .receipt-detail {
+    position: static;
   }
 
   .data-table {
