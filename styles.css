@@ -717,3 +717,313 @@ dialog::backdrop {
     overflow-x: auto;
   }
 }
+
+/* Lexware-inspired dashboard theme */
+:root {
+  --canvas: #f3f3f3;
+  --nav: #343434;
+  --nav-soft: #4a4a4a;
+  --blue: #008b6f;
+  --lex-green: #00a878;
+  --lex-red: #d95050;
+  --shadow: 0 1px 2px rgba(18, 31, 48, 0.08);
+}
+
+.app-shell {
+  display: block;
+}
+
+.sidebar {
+  min-height: 42px;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 24px;
+  gap: 22px;
+  background: var(--nav);
+}
+
+.brand {
+  min-height: 42px;
+}
+
+.brand-mark {
+  display: none;
+}
+
+.brand span,
+.sidebar-footer {
+  display: none;
+}
+
+.nav-list {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  overflow-x: auto;
+}
+
+.nav-item {
+  width: auto;
+  min-height: 42px;
+  display: flex;
+  grid-template-columns: none;
+  padding: 0 11px;
+  border-radius: 0;
+  white-space: nowrap;
+}
+
+.nav-count {
+  min-width: 20px;
+}
+
+.workspace {
+  max-width: 1220px;
+  margin: 0 auto;
+  padding: 24px 18px 36px;
+}
+
+.topbar h1 {
+  font-size: 34px;
+  font-weight: 500;
+}
+
+.lex-dashboard {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.65fr;
+  grid-template-areas:
+    "bank tax chart"
+    "tasks advisor chart"
+    "tasks export chart";
+  gap: 18px;
+  align-items: start;
+}
+
+.lex-card {
+  border: 1px solid #dddddd;
+  border-radius: 3px;
+  background: #fff;
+  box-shadow: var(--shadow);
+  padding: 18px;
+}
+
+.lex-card h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.lex-card p {
+  color: #666;
+  margin: 8px 0 0;
+}
+
+.lex-card button {
+  min-height: 30px;
+  color: var(--lex-green);
+  border: 0;
+  background: transparent;
+  font-weight: 700;
+  padding: 0;
+}
+
+.lex-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.ghost-menu {
+  min-height: 24px;
+  width: 28px;
+  color: #777 !important;
+  font-size: 18px;
+}
+
+.bank-overview {
+  grid-area: bank;
+}
+
+.tasks-overview {
+  grid-area: tasks;
+}
+
+.tax-card {
+  grid-area: tax;
+}
+
+.advisor-card {
+  grid-area: advisor;
+  position: relative;
+}
+
+.advisor-card .ghost-menu {
+  position: absolute;
+  right: 12px;
+  top: 10px;
+}
+
+.overview-chart {
+  grid-area: chart;
+}
+
+.export-card {
+  grid-area: export;
+}
+
+.lex-kv,
+.bank-line,
+.tax-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #ececec;
+}
+
+.lex-kv span,
+.bank-line span,
+.tax-row span,
+.task-list span,
+.summary-numbers span {
+  color: #5b5b5b;
+  font-size: 13px;
+}
+
+.lex-kv strong,
+.bank-line strong,
+.tax-row strong {
+  font-size: 14px;
+}
+
+.lex-actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  justify-items: end;
+}
+
+.task-list {
+  display: grid;
+}
+
+.task-list div {
+  padding: 10px 0;
+  border-bottom: 1px solid #ececec;
+}
+
+.task-list strong,
+.task-list small {
+  display: block;
+}
+
+.task-list small {
+  color: #cc5a3f;
+  margin-top: 3px;
+}
+
+.summary-numbers {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.summary-numbers strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.chart-title-row select {
+  min-height: 32px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  padding: 4px 8px;
+}
+
+.lex-chart {
+  position: relative;
+  height: 285px;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  border-left: 1px solid #e3e3e3;
+  border-bottom: 1px solid #e3e3e3;
+  background: linear-gradient(#f0f0f0 1px, transparent 1px) 0 0 / 100% 20%;
+}
+
+.lex-chart-month {
+  position: relative;
+  min-width: 0;
+}
+
+.lex-chart-month span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -24px;
+  color: #666;
+  font-size: 12px;
+  text-align: center;
+}
+
+.income-dot,
+.expense-dot {
+  position: absolute;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  transform: translateX(-50%);
+}
+
+.income-dot {
+  background: var(--lex-green);
+}
+
+.expense-dot {
+  background: var(--lex-red);
+}
+
+.chart-legend {
+  display: flex;
+  gap: 18px;
+  margin-top: 34px;
+  color: #555;
+  font-size: 13px;
+}
+
+.green-line::before,
+.red-line::before {
+  content: "";
+  display: inline-block;
+  width: 20px;
+  height: 3px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.green-line::before {
+  background: var(--lex-green);
+}
+
+.red-line::before {
+  background: var(--lex-red);
+}
+
+@media (max-width: 1020px) {
+  .lex-dashboard {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "bank"
+      "tasks"
+      "tax"
+      "advisor"
+      "chart"
+      "export";
+  }
+}

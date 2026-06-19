@@ -270,79 +270,95 @@ function receiptRows(items) {
 function renderDashboard() {
   const openReceipts = state.receipts.filter(item => item.status !== "Gebucht").length;
   const openBank = state.bank.filter(item => item.status !== "Zugeordnet").length;
-  const openOpos = state.opos.filter(item => item.open > 0).length;
   const exportReady = state.journal.filter(item => item.export === "bereit").length;
-  const cards = [
-    { title: "Belege pruefen", value: openReceipts, note: "Inbox und Kontierung", view: "receipts", action: "Belegarbeitsplatz" },
-    { title: "Bank abgleichen", value: openBank, note: "Umsaetze ohne finale Zuordnung", view: "bank", action: "Bankmodul" },
-    { title: "OPOS klaeren", value: openOpos, note: "Offene Posten", view: "opos", action: "OPOS" },
-    { title: "DATEV exportieren", value: exportReady, note: "Buchungssaetze bereit", view: "export", action: "Export" }
-  ];
+  const income = state.reports.reduce((sum, item) => sum + item.revenue, 0);
+  const expense = state.reports.reduce((sum, item) => sum + item.expense, 0);
+  const balance = state.bank.reduce((sum, item) => sum + item.amount, 0) + 1500;
+  const max = Math.max(...state.reports.flatMap(item => [item.revenue, item.expense]));
 
   return `
-    <div class="stack">
-      <section class="workflow-panel">
-        <div class="section-header">
-          <div>
-            <h2>Arbeitsvorrat heute</h2>
-            <p>Prioritaeten, Sperren und Monatsabschluss statt Belegliste</p>
-          </div>
-          <button data-action="vat-check">Monat pruefen</button>
+    <div class="lex-dashboard">
+      <section class="lex-card bank-overview">
+        <div class="lex-card-header">
+          <h2>Bankuebersicht</h2>
+          <button class="ghost-menu" title="Optionen">...</button>
         </div>
-        <div class="task-grid">
-          ${cards.map(card => `
-            <article class="task-card">
-              <span>${card.title}</span>
-              <strong>${card.value}</strong>
-              <small>${card.note}</small>
-              <button data-view-jump="${card.view}">${card.action}</button>
-            </article>
-          `).join("")}
+        <div class="lex-kv">
+          <span>Gesamtkontostand</span>
+          <strong>${formatMoney(balance)}</strong>
+        </div>
+        <div class="bank-line"><span>PayPal Konto</span><strong>${formatMoney(280)}</strong></div>
+        <div class="bank-line"><span>Sparkasse Geschaeftskonto</span><strong>${formatMoney(balance - 280)}</strong></div>
+        <div class="lex-actions">
+          <button data-view-jump="bank">${openBank} Kontoumsaetze zuordnen</button>
+          <button data-action="sync-bank">Umsaetze abrufen</button>
         </div>
       </section>
-      <div class="view-grid">
-        <div class="stack">
-          <section class="card">
-            <div class="section-header">
-              <div>
-                <h2>Qualitaetsampel Juni</h2>
-                <p>Was vor UStVA und Export noch blockiert</p>
-              </div>
-            </div>
-            <div class="suggestion-list">
-              <div class="suggestion"><div><strong>Bankabstimmung</strong><small>${openBank === 0 ? "vollstaendig" : `${openBank} Klaerfaelle offen`}</small></div><span class="badge ${openBank === 0 ? "green" : "amber"}">${openBank === 0 ? "OK" : "Pruefen"}</span></div>
-              <div class="suggestion"><div><strong>Belegpflicht</strong><small>${openReceipts} Belege noch nicht gebucht</small></div><span class="badge ${openReceipts === 0 ? "green" : "red"}">${openReceipts === 0 ? "OK" : "Offen"}</span></div>
-              <div class="suggestion"><div><strong>Exportfaehigkeit</strong><small>${exportReady} Buchungen im DATEV-Stapel</small></div><span class="badge green">bereit</span></div>
-            </div>
-          </section>
-          <section class="workflow-panel">
-            <div class="section-header">
-              <div>
-                <h2>Monatlicher Ablauf</h2>
-                <p>Vom Eingang bis zum Steuerberaterexport</p>
-              </div>
-            </div>
-            <div class="workflow-steps">
-              ${["Belege erfassen", "Kontierung pruefen", "Journal buchen", "DATEV exportieren"].map((step, index) => `
-                <div class="step">
-                  <span class="badge blue">0${index + 1}</span>
-                  <strong>${step}</strong>
-                  <span>${["API, E-Mail, Upload und Kassenbuch", "SKR03/SKR04 mit Konfidenz", "Soll/Haben und Auditlog", "CSV/EXTF-naher Stapel"][index]}</span>
-                </div>
-              `).join("")}
-            </div>
-          </section>
+
+      <section class="lex-card tasks-overview">
+        <div class="lex-card-header">
+          <h2>Aufgaben</h2>
+          <button class="ghost-menu" title="Aktualisieren">↻</button>
         </div>
-        <aside class="stack">
-          ${renderSuggestions()}
-          ${renderBankCard()}
-          ${renderPeriodCard()}
-        </aside>
-      </div>
+        <div class="task-list">
+          <div><span>Einnahmen</span><strong>1 offener Posten</strong><small>1 ueberfaellige Rechnung</small></div>
+          <div><span>Ausgaben</span><strong>Nichts zu bezahlen</strong><small>Keine offenen Ausgaben</small></div>
+          <div><span>Angebote</span><strong>Nichts ausstehend</strong><small>Alle Angebote bearbeitet</small></div>
+          <div><span>Belege</span><strong>${openReceipts} zu pruefen</strong><small>Zum Belegarbeitsplatz</small></div>
+        </div>
+        <button data-view-jump="receipts">Belege pruefen</button>
+      </section>
+
+      <section class="lex-card tax-card">
+        <div class="lex-card-header">
+          <h2>Umsatzsteuer</h2>
+          <button class="ghost-menu" title="Aktualisieren">↻</button>
+        </div>
+        <div class="tax-row"><span>Aktueller Zeitraum</span><strong>897,70 €</strong></div>
+        <div class="tax-row"><span>Vorheriger Zeitraum</span><strong>596,94 €</strong></div>
+        <button data-action="vat-check">Zur Voranmeldung</button>
+      </section>
+
+      <section class="lex-card advisor-card">
+        <button class="ghost-menu" title="Schliessen">x</button>
+        <h2>Mein Steuerberater</h2>
+        <p>Gewaehren Sie Ihrem Steuerberater Zugriff und stimmen Sie Buchungen online ab.</p>
+        <button data-view-jump="export">Online zusammenarbeiten</button>
+      </section>
+
+      <section class="lex-card overview-chart">
+        <div class="lex-card-header chart-title-row">
+          <div>
+            <h2>Uebersicht</h2>
+            <p>Einnahmen/Ausgaben-Ueberblick und Planung</p>
+          </div>
+          <select aria-label="Zeitraum"><option>Aktuelles Jahr</option><option>Juni 2026</option></select>
+        </div>
+        <div class="summary-numbers">
+          <div><span>Einnahmen</span><strong>${formatMoney(income)}</strong></div>
+          <div><span>Ausgaben</span><strong>${formatMoney(expense)}</strong></div>
+          <div><span>Differenz</span><strong>${formatMoney(income - expense)}</strong></div>
+        </div>
+        <div class="lex-chart">
+          ${state.reports.map(item => `
+            <div class="lex-chart-month">
+              <div class="income-dot" style="bottom:${Math.round(item.revenue / max * 78) + 14}%"></div>
+              <div class="expense-dot" style="bottom:${Math.round(item.expense / max * 78) + 14}%"></div>
+              <span>${item.month}</span>
+            </div>
+          `).join("")}
+        </div>
+        <div class="chart-legend"><span class="green-line">Einnahmen</span><span class="red-line">Ausgaben</span></div>
+      </section>
+
+      <section class="lex-card export-card">
+        <h2>DATEV & Pruefung</h2>
+        <p>${exportReady} Buchungssaetze sind exportbereit.</p>
+        <button data-view-jump="export">Zum Export</button>
+      </section>
     </div>
   `;
 }
-
 function renderSuggestions() {
   const suggestions = state.receipts.slice(0, 3).map(item => `
     <div class="suggestion">
