@@ -1027,3 +1027,83 @@ dialog::backdrop {
       "export";
   }
 }
+
+/* Shell overrides for Lexware-style layout */
+.app-shell {
+  display: block;
+}
+
+.sidebar {
+  min-height: 42px;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  padding: 0 20px;
+  background: #343434;
+}
+
+.brand-mark {
+  display: none;
+}
+
+.brand span,
+.sidebar-footer {
+  display: none;
+}
+
+.nav-list {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  overflow-x: auto;
+}
+
+.nav-item {
+  width: auto;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 11px;
+  border-radius: 0;
+  white-space: nowrap;
+}
+
+.workspace {
+  max-width: 1220px;
+  margin: 0 auto;
+  padding: 24px 18px 36px;
+}
+
+.topbar h1 {
+  font-size: 34px;
+  font-weight: 500;
+}
+
+.global-search {
+  border-radius: 3px;
+}
+
+.primary-button {
+  background: #00a878;
+  border-color: #00a878;
+}
+
+.ghost-menu {
+  min-height: 24px;
+  width: 28px;
+  border: 0;
+  background: transparent;
+  color: #777 !important;
+  font-size: 18px;
+}
+
+@media (max-width: 1020px) {
+  .sidebar {
+    padding: 0 12px;
+  }
+
+  .nav-item {
+    padding: 0 8px;
+  }
+}
