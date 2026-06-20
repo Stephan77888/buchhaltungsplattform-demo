@@ -1124,15 +1124,16 @@ dialog::backdrop {
 
 /* Shell overrides for Lexware-style layout */
 .app-shell {
-  display: block;
+  display: grid;
+  grid-template-columns: 272px minmax(0, 1fr);
 }
 
 .sidebar {
-  min-height: 42px;
-  flex-direction: row;
-  align-items: center;
-  gap: 16px;
-  padding: 0 20px;
+  min-height: 100vh;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 20px;
+  padding: 20px 18px;
   background: #343434;
 }
 
@@ -1146,21 +1147,21 @@ dialog::backdrop {
 }
 
 .nav-list {
-  display: flex;
-  align-items: stretch;
-  gap: 2px;
-  overflow-x: auto;
+  display: grid;
+  gap: 4px;
+  overflow-x: visible;
 }
 
 .nav-item {
-  width: auto;
-  min-height: 42px;
-  display: flex;
+  width: 100%;
+  min-height: 38px;
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
   align-items: center;
-  gap: 6px;
-  padding: 0 11px;
-  border-radius: 0;
-  white-space: nowrap;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  white-space: normal;
 }
 
 .workspace {
@@ -1193,11 +1194,24 @@ dialog::backdrop {
 }
 
 @media (max-width: 1020px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
   .sidebar {
-    padding: 0 12px;
+    min-height: auto;
+    padding: 14px;
+  }
+
+  .nav-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .sidebar {
+    padding: 14px;
   }
 
   .nav-item {
-    padding: 0 8px;
+    padding: 8px 8px;
   }
 }
