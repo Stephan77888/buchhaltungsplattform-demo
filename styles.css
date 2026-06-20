@@ -525,11 +525,39 @@ button:hover {
 
 .receipt-workbench {
   grid-template-columns: minmax(0, 1fr) minmax(360px, 0.72fr);
+  align-items: start;
+}
+
+.receipt-list-panel {
+  padding: 18px;
 }
 
 .receipt-detail {
   position: sticky;
   top: 18px;
+  padding: 18px;
+}
+
+.receipt-table-shell .data-table th {
+  padding: 11px 8px 8px;
+}
+
+.receipt-table-shell .data-table td {
+  padding: 12px 8px;
+  font-size: 13px;
+}
+
+.table-primary {
+  display: block;
+  font-weight: 700;
+  color: #202020;
+}
+
+.table-secondary {
+  display: block;
+  margin-top: 2px;
+  color: #777;
+  font-size: 12px;
 }
 
 .preview-box {
@@ -556,6 +584,48 @@ button:hover {
 
 .preview-box small {
   color: var(--muted);
+}
+
+.receipt-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.receipt-summary div,
+.status-stack div {
+  padding: 10px 12px;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.receipt-summary span,
+.status-stack span {
+  display: block;
+  color: #6f6f6f;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.receipt-summary strong,
+.status-stack strong {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.detail-section {
+  margin-top: 14px;
+}
+
+.detail-title {
+  margin-bottom: 8px;
+  color: #4a4a4a;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 .field-grid {
@@ -587,6 +657,10 @@ button:hover {
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 12px;
+}
+
+.lex-actions-row {
+  gap: 12px;
 }
 
 dialog {
@@ -674,6 +748,14 @@ dialog::backdrop {
   .view-grid {
     grid-template-columns: 1fr;
   }
+
+  .receipt-workbench {
+    grid-template-columns: 1fr;
+  }
+
+  .receipt-detail {
+    position: static;
+  }
 }
 
 @media (max-width: 720px) {
@@ -701,12 +783,10 @@ dialog::backdrop {
   .nav-list,
   .workflow-steps,
   .task-grid,
-  .field-grid {
+  .field-grid,
+  .receipt-summary,
+  .status-stack {
     grid-template-columns: 1fr;
-  }
-
-  .receipt-detail {
-    position: static;
   }
 
   .data-table {
@@ -824,6 +904,20 @@ dialog::backdrop {
   background: transparent;
   font-weight: 700;
   padding: 0;
+}
+
+.text-button {
+  min-height: 28px;
+  padding: 0;
+  color: var(--lex-green);
+  border: 0;
+  background: transparent;
+  font-weight: 700;
+  text-align: left;
+}
+
+.primary-link {
+  color: #0f7d63;
 }
 
 .lex-card-header {

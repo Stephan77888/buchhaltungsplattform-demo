@@ -255,13 +255,16 @@ function receiptRows(items) {
   return items.map(item => `
     <tr class="${state.selectedReceiptId === item.id ? "selected-row" : ""}">
       <td class="truncate">${item.id}</td>
-      <td class="truncate">${item.party}</td>
+      <td>
+        <strong class="table-primary">${item.party}</strong>
+        <small class="table-secondary">${item.channel}</small>
+      </td>
       <td>${item.type}</td>
       <td class="amount">${formatMoney(item.amount)}</td>
       <td class="truncate">${item.account}</td>
       <td><span class="badge ${badgeClass(item.status)}">${item.status}</span></td>
       <td>
-        <button data-action="select-receipt" data-id="${item.id}">${state.selectedReceiptId === item.id ? "Offen" : "Auswaehlen"}</button>
+        <button class="text-button" data-action="select-receipt" data-id="${item.id}">${state.selectedReceiptId === item.id ? "Offen" : "Auswaehlen"}</button>
       </td>
     </tr>
   `).join("");
@@ -440,7 +443,7 @@ function renderReceipts() {
   if (selected) state.selectedReceiptId = selected.id;
   return `
     <div class="view-grid receipt-workbench">
-      <section class="table-panel">
+      <section class="lex-card receipt-list-panel">
         <div class="section-header">
           <div>
             <h2>Inbox</h2>
@@ -450,7 +453,9 @@ function renderReceipts() {
             ${filters.map(filter => `<button class="${state.receiptFilter === filter ? "active" : ""}" data-filter="${filter}">${filter}</button>`).join("")}
           </div>
         </div>
-        ${table(["Beleg", "Partner", "Typ", "Betrag", "Konto", "Status", ""], receiptRows(items))}
+        <div class="receipt-table-shell">
+          ${table(["Beleg", "Partner", "Typ", "Betrag", "Konto", "Status", ""], receiptRows(items))}
+        </div>
       </section>
       ${renderReceiptDetail(selected)}
     </div>
@@ -460,35 +465,60 @@ function renderReceipts() {
 function renderReceiptDetail(receipt) {
   if (!receipt) return `<section class="card"><div class="empty">Kein Beleg in diesem Filter.</div></section>`;
   return `
-    <section class="card receipt-detail">
+    <section class="lex-card receipt-detail">
       <div class="section-header">
         <div>
           <h2>${receipt.id} pruefen</h2>
-          <p>${receipt.channel} · ${receipt.type} · Konfidenz ${receipt.confidence}%</p>
+          <p>${receipt.channel} - ${receipt.type} - Konfidenz ${receipt.confidence}%</p>
         </div>
         <span class="badge ${badgeClass(receipt.status)}">${receipt.status}</span>
       </div>
+      <div class="receipt-summary">
+        <div>
+          <span>Partner</span>
+          <strong>${receipt.party}</strong>
+        </div>
+        <div>
+          <span>Betrag</span>
+          <strong>${formatMoney(receipt.amount)}</strong>
+        </div>
+        <div>
+          <span>Kontierung</span>
+          <strong>${receipt.account}</strong>
+        </div>
+      </div>
       <div class="preview-box">
-        <strong>Belegvorschau</strong>
-        <span>${receipt.party}</span>
-        <span>${formatMoney(receipt.amount)}</span>
-        <small>Simulierte PDF/XML-Vorschau mit Hash- und OCR-Ergebnis</small>
+        <strong>Vorschau</strong>
+        <span>PDF / XML</span>
+        <small>Simulierte Originaldatei mit OCR-Ergebnis und Hash-Pruefung</small>
       </div>
-      <div class="field-grid">
-        <label>Partner<input id="receiptParty" value="${receipt.party}"></label>
-        <label>Betrag<input id="receiptAmount" type="number" step="0.01" value="${receipt.amount}"></label>
-        <label>Konto<input id="receiptAccount" value="${receipt.account}"></label>
-        <label>Steuer %<input id="receiptTax" type="number" step="1" value="${receipt.tax}"></label>
+      <div class="detail-section">
+        <div class="detail-title">Erkannte Daten</div>
+        <div class="field-grid">
+          <label>Partner<input id="receiptParty" value="${receipt.party}"></label>
+          <label>Betrag<input id="receiptAmount" type="number" step="0.01" value="${receipt.amount}"></label>
+          <label>Konto<input id="receiptAccount" value="${receipt.account}"></label>
+          <label>Steuer %<input id="receiptTax" type="number" step="1" value="${receipt.tax}"></label>
+        </div>
       </div>
-      <div class="action-row">
-        <button data-action="save-receipt" data-id="${receipt.id}">Aenderungen speichern</button>
-        <button data-action="validate-receipt" data-id="${receipt.id}">Validieren</button>
-        <button class="primary-button" data-action="post-receipt" data-id="${receipt.id}">Ins Journal buchen</button>
+      <div class="detail-section">
+        <div class="detail-title">Pruefung</div>
+        <div class="status-stack">
+          <div><span>Konfidenz</span><strong>${receipt.confidence}%</strong></div>
+          <div><span>Typ</span><strong>${receipt.type}</strong></div>
+          <div><span>Kanal</span><strong>${receipt.channel}</strong></div>
+        </div>
       </div>
-      <div class="action-row">
-        <button data-action="learn-rule" data-id="${receipt.id}">Regel speichern</button>
-        <button data-action="mark-duplicate" data-id="${receipt.id}">Dublette markieren</button>
-        <button data-action="request-approval" data-id="${receipt.id}">Freigabe anfordern</button>
+      <div class="detail-section">
+        <div class="detail-title">Aktionen</div>
+        <div class="action-row lex-actions-row">
+          <button class="text-button" data-action="save-receipt" data-id="${receipt.id}">Aenderungen speichern</button>
+          <button class="text-button" data-action="validate-receipt" data-id="${receipt.id}">Validieren</button>
+          <button class="text-button primary-link" data-action="post-receipt" data-id="${receipt.id}">Ins Journal buchen</button>
+          <button class="text-button" data-action="learn-rule" data-id="${receipt.id}">Regel speichern</button>
+          <button class="text-button" data-action="mark-duplicate" data-id="${receipt.id}">Dublette markieren</button>
+          <button class="text-button" data-action="request-approval" data-id="${receipt.id}">Freigabe anfordern</button>
+        </div>
       </div>
     </section>
   `;
